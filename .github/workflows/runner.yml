@@ -25,5 +25,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ github.actor }}/sandbox:latest
+          tags: ghcr.io/${{ github.actor }}/sandbox:latest
 
