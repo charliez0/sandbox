@@ -34,7 +34,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/run \
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
     sed 's/#force_color_prompt=yes/force_color_prompt=yes/' -i /root/.bashrc && \
     sed 's/plugins=(git)/plugins=(git command-not-found)/' -i /root/.zshrc && \
-    rm /etc/ssh/ssh_host_* && userdel -rf ubuntu
+    rm /etc/ssh/ssh_host_* && (userdel -rf ubuntu || true)
 
 RUN mkdir -p -m0755 /var/run/sshd /run/sshd && touch /run/utmp && \
     echo '#!/bin/sh\n\
