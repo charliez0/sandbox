@@ -34,7 +34,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/run \
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
     sed 's/#force_color_prompt=yes/force_color_prompt=yes/' -i /root/.bashrc && \
     sed 's/plugins=(git)/plugins=(git command-not-found)/' -i /root/.zshrc && \
-    rm /etc/ssh/ssh_host_*
+    rm /etc/ssh/ssh_host_* && userdel -rf ubuntu
 
 RUN mkdir -p -m0755 /var/run/sshd /run/sshd && touch /run/utmp && \
     echo '#!/bin/sh\n\
@@ -48,6 +48,6 @@ for key_type in $KEY_TYPES; do\n\
         ssh-keygen -t $key_type -f "$KEY_FILE" -N ""\n\
     fi\n\
 done\n\
-exec "$@"\n' > /entrypoint.sh && chmod +x /entrypoint.sh
+exec $@\n' > /entrypoint.sh && chmod +x /entrypoint.sh
 ENTRYPOINT /entrypoint.sh
 
