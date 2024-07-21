@@ -49,5 +49,5 @@ for key_type in $KEY_TYPES; do\n\
     fi\n\
 done\n\
 exec $@\n' > /entrypoint.sh && chmod +x /entrypoint.sh
-ENTRYPOINT /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
 
