@@ -18,7 +18,7 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/run \
     curl -fsSL https://deb.nodesource.com/setup_lts.x | bash && \
     apt install -y nodejs $(check-language-support -l en_US) && \
     apt autoremove -y && apt clean && rm -rf /var/lib/apt/lists/* && \
-    dotnet new install Mal.Mdk2.ScriptTemplates && \
+    dotnet new install Mal.Mdk2.ScriptTemplates && corepack enable && \
     mkdir -p /opendevin && mkdir -p /opendevin/logs && chmod 777 /opendevin/logs && \
     wget --progress=bar:force -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh" && \
     bash Miniforge3.sh -b -p /opendevin/miniforge3 && chmod -R g+w /opendevin/miniforge3 && \
@@ -33,7 +33,21 @@ RUN --mount=type=tmpfs,target=/tmp --mount=type=tmpfs,target=/run \
     dpkg-reconfigure -f noninteractive tzdata && \
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" && \
     sed 's/#force_color_prompt=yes/force_color_prompt=yes/' -i /root/.bashrc && \
-    sed 's/plugins=(git)/plugins=(git command-not-found)/' -i /root/.zshrc
+    sed 's/plugins=(git)/plugins=(git command-not-found)/' -i /root/.zshrc && \
+    rm /etc/ssh/ssh_host_*
 
-RUN mkdir -p -m0755 /var/run/sshd /run/sshd && touch /run/utmp
+RUN mkdir -p -m0755 /var/run/sshd /run/sshd && touch /run/utmp && \
+    echo '#!/bin/sh\n\
+set -e\n\
+KEY_DIR="/etc/ssh"\n\
+KEY_TYPES="rsa ecdsa ed25519"\n\
+for key_type in $KEY_TYPES; do\n\
+    KEY_FILE="${KEY_DIR}/ssh_host_${key_type}_key"\n\
+    if [ ! -f "$KEY_FILE" ]; then\n\
+        echo "Generating $key_type host key..."\n\
+        ssh-keygen -t $key_type -f "$KEY_FILE" -N ""\n\
+    fi\n\
+done\n\
+exec "$@"\n' > /entrypoint.sh && chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh
 
